@@ -4,15 +4,15 @@ Resources:
   EIPA:
     Type: AWS::EC2::EIP
     Properties:
-    Domain: vpc
+      Domain: vpc
   EIPB:
     Type: AWS::EC2::EIP
     Properties:
-    Domain: vpc
+      Domain: vpc
   EIPC:
     Type: AWS::EC2::EIP
     Properties:
-    Domain: vpc
+      Domain: vpc
   NGWA:
     Type: 'AWS::EC2::NatGateway'
     Properties:

@@ -158,3 +158,13 @@ Outputs:
     Value: !Ref SubnetPrivB
     Export: 
       Name: pandp-vpc1-subnet-priv-b
+  pandpvpc1subnetpubc:
+    Description: Peaches and Plums SubnetPubC
+    Value: !Ref SubnetPubC
+    Export: 
+      Name: pandp-vpc1-subnet-pub-c
+  pandpvpc1subnetprivc:
+    Description: Peaches and Plums SubnetPrivC
+    Value: !Ref SubnetPrivC
+    Export: 
+      Name: pandp-vpc1-subnet-priv-c
