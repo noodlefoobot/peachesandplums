@@ -12,6 +12,11 @@ Resources:
           Value: dev
         - Key: application
           Value: pandp
+#  IPv6CidrBlock:
+#    Type: AWS::EC2::VPCCidrBlock
+#    Properties:
+#      VpcId: !Ref VPC
+#      AmazonProvidedIpv6CidrBlock: true
   IGW:
     Type: AWS::EC2::InternetGateway
     Properties:
@@ -47,6 +52,15 @@ Resources:
       DestinationCidrBlock: '0.0.0.0/0'
       GatewayId:
         Ref: IGW
+#  routeTableDefaultIPv6:
+#    Type: AWS::EC2::Route
+#    DependsOn: IGWAttachment
+#    Properties:
+#      RouteTableId:
+#        Ref: routeTableWeb
+#      DestinationIpv6CidrBlock: '::/0'
+#      GatewayId:
+#        Ref: IGW
   routeTableAssociationPubA:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -61,10 +75,16 @@ Resources:
         Ref: routeTableWeb
   SubnetPubA:
     Type: AWS::EC2::Subnet
+#    DependsOn: IPv6CidrBlock
     Properties:
       AvailabilityZone: !Select [ 0, !GetAZs '' ]
       VpcId: !Ref VPC
       CidrBlock: 10.90.10.0/24
+#      Ipv6CidrBlock: 
+#        Fn::Sub:
+#          - "${VpcPart}${SubnetPart}"
+#          - SubnetPart: '00::/64'
+#            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
       Tags:
         - Key: environment
           Value: dev
@@ -72,10 +92,16 @@ Resources:
           Value: pandp
   SubnetPrivA:
     Type: AWS::EC2::Subnet
+#    DependsOn: IPv6CidrBlock
     Properties:
       AvailabilityZone: !Select [ 0, !GetAZs '' ]
       VpcId: !Ref VPC
       CidrBlock: 10.90.100.0/24
+#     Ipv6CidrBlock: 
+#        Fn::Sub:
+#          - "${VpcPart}${SubnetPart}"
+#          - SubnetPart: '00::/64'
+#            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
       Tags:
         - Key: environment
           Value: dev
@@ -83,10 +109,16 @@ Resources:
           Value: pandp
   SubnetPubB:
     Type: AWS::EC2::Subnet
+#    DependsOn: IPv6CidrBlock
     Properties:
       AvailabilityZone: !Select [ 0, !GetAZs '' ]
       VpcId: !Ref VPC
       CidrBlock: 10.90.12.0/24
+#      Ipv6CidrBlock: 
+#        Fn::Sub:
+#          - "${VpcPart}${SubnetPart}"
+#          - SubnetPart: '00::/64'
+#            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
       Tags:
         - Key: environment
           Value: dev
@@ -94,10 +126,16 @@ Resources:
           Value: pandp
   SubnetPrivB:
     Type: AWS::EC2::Subnet
+#    DependsOn: IPv6CidrBlock
     Properties:
       AvailabilityZone: !Select [ 0, !GetAZs '' ]
       VpcId: !Ref VPC
       CidrBlock: 10.90.102.0/24
+#      Ipv6CidrBlock: 
+#        Fn::Sub:
+#          - "${VpcPart}${SubnetPart}"
+#          - SubnetPart: '00::/64'
+#            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
       Tags:
         - Key: environment
           Value: dev
