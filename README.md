@@ -1,2 +1,2 @@
 # peachesandplums
-placeholder project for infrastructure code
+placeholder project for aws playground
