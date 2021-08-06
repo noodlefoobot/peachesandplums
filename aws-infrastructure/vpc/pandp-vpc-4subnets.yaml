@@ -59,6 +59,12 @@ Resources:
       SubnetId: !Ref SubnetPubB
       RouteTableId:
         Ref: routeTableWeb
+  routeTableAssociationPubC:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetPubC
+      RouteTableId:
+        Ref: routeTableWeb
   SubnetPubA:
     Type: AWS::EC2::Subnet
     Properties:
@@ -75,7 +81,7 @@ Resources:
     Properties:
       AvailabilityZone: !Select [ 0, !GetAZs '' ]
       VpcId: !Ref VPC
-      CidrBlock: 10.90.100.0/24
+      CidrBlock: 10.90.110.0/24
       Tags:
         - Key: environment
           Value: dev
@@ -97,7 +103,29 @@ Resources:
     Properties:
       AvailabilityZone: !Select [ 0, !GetAZs '' ]
       VpcId: !Ref VPC
-      CidrBlock: 10.90.102.0/24
+      CidrBlock: 10.90.112.0/24
+      Tags:
+        - Key: environment
+          Value: dev
+        - Key: application
+          Value: pandp
+  SubnetPubC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      VpcId: !Ref VPC
+      CidrBlock: 10.90.14.0/24
+      Tags:
+        - Key: environment
+          Value: dev
+        - Key: application
+          Value: pandp
+  SubnetPrivC:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      VpcId: !Ref VPC
+      CidrBlock: 10.90.114.0/24
       Tags:
         - Key: environment
           Value: dev

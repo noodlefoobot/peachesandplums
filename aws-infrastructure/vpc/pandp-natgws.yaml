@@ -1,0 +1,84 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "Adds NATGateway function to private subnets. Dependant on pandp-vpc-4subnets stack outputs."
+Resources:
+  EIPA:
+    Type: AWS::EC2::EIP
+    Properties:
+    Domain: vpc
+  EIPB:
+    Type: AWS::EC2::EIP
+    Properties:
+    Domain: vpc
+  EIPC:
+    Type: AWS::EC2::EIP
+    Properties:
+    Domain: vpc
+  NGWA:
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt EIPA.AllocationId
+      SubnetId: !ImportValue pandp-vpc1-subnet-pub-a
+  NGWB:
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt EIPB.AllocationId
+      SubnetId: !ImportValue pandp-vpc1-subnet-pub-b
+  NGWC:
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt EIPC.AllocationId
+      SubnetId: !ImportValue pandp-vpc1-subnet-pub-c
+  RouteTablePrivateA: 
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !ImportValue pandp-vpc1
+      Tags:
+      - Key: Name
+        Value: pandp-vpc1-rt-priv-a
+  RouteTablePrivateB: 
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !ImportValue pandp-vpc1
+      Tags:
+      - Key: Name
+        Value: pandp-vpc1-rt-priv-b
+  RouteTablePrivateC: 
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !ImportValue pandp-vpc1
+      Tags:
+      - Key: Name
+        Value: pandp-vpc1-rt-priv-c
+  RouteNatGWA: 
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref RouteTablePrivateA
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NGWA
+  RouteNatGWB: 
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref RouteTablePrivateB
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NGWB
+  RouteNatGWC: 
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref RouteTablePrivateC
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NGWC
+  RouteTableAssociationPrivA:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !ImportValue pandp-vpc1-subnet-priv-a
+      RouteTableId: !Ref RouteTablePrivateA
+  RouteTableAssociationPrivB:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !ImportValue pandp-vpc1-subnet-priv-b
+      RouteTableId: !Ref RouteTablePrivateB
+  RouteTableAssociationPrivC:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !ImportValue pandp-vpc1-subnet-priv-c
+      RouteTableId: !Ref RouteTablePrivateC
