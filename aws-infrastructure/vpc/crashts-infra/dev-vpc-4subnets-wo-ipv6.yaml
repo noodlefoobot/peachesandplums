@@ -111,7 +111,7 @@ Resources:
     Type: AWS::EC2::Subnet
 #    DependsOn: IPv6CidrBlock
     Properties:
-      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
       VpcId: !Ref VPC
       CidrBlock: 10.50.12.0/24
 #      Ipv6CidrBlock: 
@@ -128,7 +128,7 @@ Resources:
     Type: AWS::EC2::Subnet
 #    DependsOn: IPv6CidrBlock
     Properties:
-      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
       VpcId: !Ref VPC
       CidrBlock: 10.50.102.0/24
 #      Ipv6CidrBlock: 
@@ -144,27 +144,27 @@ Resources:
 
 Outputs:
   crashtsvpc1:
-    Description: Peaches and Plums VPC_ID
+    Description: crashts-dev VPC_ID
     Value: !Ref VPC
     Export: 
       Name: crashts-vpc1
   crashtsvpc1subnetpuba:
-    Description: Peaches and Plums SubnetPubA
+    Description: crashts-dev SubnetPubA
     Value: !Ref SubnetPubA
     Export: 
       Name: crashts-vpc1-subnet-pub-a
   crashtsvpc1subnetpriva:
-    Description: Peaches and Plums SubnetPrivA
+    Description: crashts-dev SubnetPrivA
     Value: !Ref SubnetPrivA
     Export: 
       Name: crashts-vpc1-subnet-priv-a
   crashtsvpc1subnetpubb:
-    Description: Peaches and Plums SubnetPubB
+    Description: crashts-dev SubnetPubB
     Value: !Ref SubnetPubB
     Export: 
       Name: crashts-vpc1-subnet-pub-b
   crashtsvpc1subnetprivb:
-    Description: Peaches and Plums SubnetPrivB
+    Description: crashts-dev SubnetPrivB
     Value: !Ref SubnetPrivB
     Export: 
       Name: crashts-vpc1-subnet-priv-b

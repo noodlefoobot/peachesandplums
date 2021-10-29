@@ -90,7 +90,7 @@ Resources:
   SubnetPubB:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
       VpcId: !Ref VPC
       CidrBlock: 10.90.12.0/24
       Tags:
@@ -101,7 +101,7 @@ Resources:
   SubnetPrivB:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
       VpcId: !Ref VPC
       CidrBlock: 10.90.112.0/24
       Tags:
@@ -112,7 +112,7 @@ Resources:
   SubnetPubC:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      AvailabilityZone: !Select [ 2, !GetAZs '' ]
       VpcId: !Ref VPC
       CidrBlock: 10.90.14.0/24
       Tags:
@@ -123,7 +123,7 @@ Resources:
   SubnetPrivC:
     Type: AWS::EC2::Subnet
     Properties:
-      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      AvailabilityZone: !Select [ 2, !GetAZs '' ]
       VpcId: !Ref VPC
       CidrBlock: 10.90.114.0/24
       Tags:

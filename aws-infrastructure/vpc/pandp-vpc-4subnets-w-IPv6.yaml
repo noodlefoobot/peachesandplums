@@ -111,7 +111,7 @@ Resources:
     Type: AWS::EC2::Subnet
 #    DependsOn: IPv6CidrBlock
     Properties:
-      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
       VpcId: !Ref VPC
       CidrBlock: 10.90.12.0/24
 #      Ipv6CidrBlock: 
@@ -128,7 +128,7 @@ Resources:
     Type: AWS::EC2::Subnet
 #    DependsOn: IPv6CidrBlock
     Properties:
-      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
       VpcId: !Ref VPC
       CidrBlock: 10.90.102.0/24
 #      Ipv6CidrBlock: 
