@@ -1,0 +1,170 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: "CF template to deploy crashts-prod VPC, with 4 subnets across 2 AZs"
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.100.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: environment
+          Value: prod
+        - Key: application
+          Value: crashts
+#  IPv6CidrBlock:
+#    Type: AWS::EC2::VPCCidrBlock
+#    Properties:
+#      VpcId: !Ref VPC
+#      AmazonProvidedIpv6CidrBlock: true
+  IGW:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: environment
+          Value: prod
+        - Key: application
+          Value: crashts
+        - Key: function
+          Value: webtraffic
+  IGWAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref IGW
+  routeTableWeb:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: environment
+          Value: prod
+        - Key: application
+          Value: crashts
+        - Key: function
+          Value: webtraffic
+  routeTableDefaultIPv4:
+    Type: AWS::EC2::Route
+    DependsOn: IGWAttachment
+    Properties:
+      RouteTableId:
+        Ref: routeTableWeb
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId:
+        Ref: IGW
+#  routeTableDefaultIPv6:
+#    Type: AWS::EC2::Route
+#    DependsOn: IGWAttachment
+#    Properties:
+#      RouteTableId:
+#        Ref: routeTableWeb
+#      DestinationIpv6CidrBlock: '::/0'
+#      GatewayId:
+#        Ref: IGW
+  routeTableAssociationPubA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetPubA
+      RouteTableId:
+        Ref: routeTableWeb
+  routeTableAssociationPubB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetPubB
+      RouteTableId:
+        Ref: routeTableWeb
+  SubnetPubA:
+    Type: AWS::EC2::Subnet
+#    DependsOn: IPv6CidrBlock
+    Properties:
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      VpcId: !Ref VPC
+      CidrBlock: 10.100.10.0/24
+#      Ipv6CidrBlock: 
+#        Fn::Sub:
+#          - "${VpcPart}${SubnetPart}"
+#          - SubnetPart: '00::/64'
+#            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
+      Tags:
+        - Key: environment
+          Value: prod
+        - Key: application
+          Value: crashts
+  SubnetPrivA:
+    Type: AWS::EC2::Subnet
+#    DependsOn: IPv6CidrBlock
+    Properties:
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      VpcId: !Ref VPC
+      CidrBlock: 10.100.100.0/24
+#     Ipv6CidrBlock: 
+#        Fn::Sub:
+#          - "${VpcPart}${SubnetPart}"
+#          - SubnetPart: '00::/64'
+#            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
+      Tags:
+        - Key: environment
+          Value: prod
+        - Key: application
+          Value: crashts
+  SubnetPubB:
+    Type: AWS::EC2::Subnet
+#    DependsOn: IPv6CidrBlock
+    Properties:
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      VpcId: !Ref VPC
+      CidrBlock: 10.100.12.0/24
+#      Ipv6CidrBlock: 
+#        Fn::Sub:
+#          - "${VpcPart}${SubnetPart}"
+#          - SubnetPart: '00::/64'
+#            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
+      Tags:
+        - Key: environment
+          Value: prod
+        - Key: application
+          Value: crashts
+  SubnetPrivB:
+    Type: AWS::EC2::Subnet
+#    DependsOn: IPv6CidrBlock
+    Properties:
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      VpcId: !Ref VPC
+      CidrBlock: 10.100.102.0/24
+#      Ipv6CidrBlock: 
+#        Fn::Sub:
+#          - "${VpcPart}${SubnetPart}"
+#          - SubnetPart: '00::/64'
+#            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
+      Tags:
+        - Key: environment
+          Value: prod
+        - Key: application
+          Value: crashts
+
+Outputs:
+  crashtsvpc1:
+    Description: Peaches and Plums VPC_ID
+    Value: !Ref VPC
+    Export: 
+      Name: crashts-vpc1
+  crashtsvpc1subnetpuba:
+    Description: Peaches and Plums SubnetPubA
+    Value: !Ref SubnetPubA
+    Export: 
+      Name: crashts-vpc1-subnet-pub-a
+  crashtsvpc1subnetpriva:
+    Description: Peaches and Plums SubnetPrivA
+    Value: !Ref SubnetPrivA
+    Export: 
+      Name: crashts-vpc1-subnet-priv-a
+  crashtsvpc1subnetpubb:
+    Description: Peaches and Plums SubnetPubB
+    Value: !Ref SubnetPubB
+    Export: 
+      Name: crashts-vpc1-subnet-pub-b
+  crashtsvpc1subnetprivb:
+    Description: Peaches and Plums SubnetPrivB
+    Value: !Ref SubnetPrivB
+    Export: 
+      Name: crashts-vpc1-subnet-priv-b
