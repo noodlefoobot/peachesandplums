@@ -1,0 +1,270 @@
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: This template deploys  VPC with the following resources - 
+  1. One VPC
+  2. Three public subnets in us-east-2a/b/c
+  3. Three private subnets in us-east-2a/b/c
+  4. IGW with a default route to public subnets
+  5. Route tables to route traffic on each subnet to route traffic to net
+
+# TO ADD TO ANOTHER TEMPLATE 
+# 6. NAT gateways for private subnets
+# 7. Four SGs to control access for inbound/outbound net traffic to each tier
+# 8. One priv and one pub basic NACL which simply allows all traffic ****** WHAT******
+# 9. Three S3 endpoints to allow private subnet direct access to S3
+# 10. Basion host to allow access in
+
+Resources:
+  VPC: 
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.30.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: crashts-dev
+  IPv6CidrBlock:
+    Type: AWS::EC2::VPCCidrBlock
+    Properties:
+      VpcId: !Ref VPC
+      AmazonProvidedIpv6CidrBlock: true
+  IGWdev:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: keyname
+          Value: value
+  IGWAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref IGWdev
+  RouteTableWeb:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: crashts-dev-rt-web
+  RouteTableWebDefaultIPv4:
+    Type: AWS::EC2::Route
+    DependsOn: IGWAttachment
+    Properties:
+      RouteTableId:
+        Ref: RouteTableWeb
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId:
+        Ref: IGWdev
+  RouteTableAssociationWebA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetWebA
+      RouteTableId: !Ref RouteTableWeb
+  RouteTableAssociationWebB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetWebB
+      RouteTableId: !Ref RouteTableWeb
+  RouteTableAssociationWebC:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetWebC
+      RouteTableId: !Ref RouteTableWeb
+  SubnetWebA:
+    Type: AWS::EC2::Subnet
+    DependsOn: IPv6CidrBlock
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: 10.30.0.0/24
+      AssignIpv6AddressOnCreation: true
+      Ipv6CidrBlock: 
+        Fn::Sub:
+          - "${VpcPart}${SubnetPart}"
+          - SubnetPart: '00::/64'
+            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
+      Tags:
+        - Key: Name
+          Value: dev-sn-web-A
+  SubnetWebB:
+    Type: AWS::EC2::Subnet
+    DependsOn: IPv6CidrBlock
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: 10.30.48.0/24
+      AssignIpv6AddressOnCreation: true
+      Ipv6CidrBlock: 
+        Fn::Sub:
+          - "${VpcPart}${SubnetPart}"
+          - SubnetPart: '04::/64'
+            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
+      Tags:
+        - Key: Name
+          Value: dev-sn-web-B
+  SubnetWebC:
+    Type: AWS::EC2::Subnet
+    DependsOn: IPv6CidrBlock
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 2, !GetAZs '' ]
+      CidrBlock: 10.30.96.0/24
+      AssignIpv6AddressOnCreation: true
+      Ipv6CidrBlock: 
+        Fn::Sub:
+          - "${VpcPart}${SubnetPart}"
+          - SubnetPart: '08::/64'
+            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
+      Tags:
+        - Key: Name
+          Value: dev-sn-web-C
+  SubnetAppA:
+    Type: AWS::EC2::Subnet
+    DependsOn: IPv6CidrBlock
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: 10.30.16.0/24
+      AssignIpv6AddressOnCreation: true
+      Ipv6CidrBlock: 
+        Fn::Sub:
+          - "${VpcPart}${SubnetPart}"
+          - SubnetPart: '01::/64'
+            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
+      Tags:
+        - Key: Name
+          Value: dev-sn-app-A
+  SubnetAppB:
+    Type: AWS::EC2::Subnet
+    DependsOn: IPv6CidrBlock
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: 10.30.64.0/24
+      AssignIpv6AddressOnCreation: true
+      Ipv6CidrBlock: 
+        Fn::Sub:
+          - "${VpcPart}${SubnetPart}"
+          - SubnetPart: '05::/64'
+            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
+      Tags:
+        - Key: Name
+          Value: dev-sn-app-B
+  SubnetAppC:
+    Type: AWS::EC2::Subnet
+    DependsOn: IPv6CidrBlock
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 2, !GetAZs '' ]
+      CidrBlock: 10.30.112.0/24
+      AssignIpv6AddressOnCreation: true
+      Ipv6CidrBlock: 
+        Fn::Sub:
+          - "${VpcPart}${SubnetPart}"
+          - SubnetPart: '09::/64'
+            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
+      Tags:
+        - Key: Name
+          Value: dev-sn-app-C
+  SubnetDBA:
+    Type: AWS::EC2::Subnet
+    DependsOn: IPv6CidrBlock
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: 10.30.32.0/24
+      AssignIpv6AddressOnCreation: true
+      Ipv6CidrBlock: 
+        Fn::Sub:
+          - "${VpcPart}${SubnetPart}"
+          - SubnetPart: '02::/64'
+            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
+      Tags:
+        - Key: Name
+          Value: dev-sn-db-A
+  SubnetDBB:
+    Type: AWS::EC2::Subnet
+    DependsOn: IPv6CidrBlock
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: 10.30.80.0/24
+      AssignIpv6AddressOnCreation: true
+      Ipv6CidrBlock: 
+        Fn::Sub:
+          - "${VpcPart}${SubnetPart}"
+          - SubnetPart: '06::/64'
+            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
+      Tags:
+        - Key: Name
+          Value: dev-sn-db-B
+  SubnetDBC:
+    Type: AWS::EC2::Subnet
+    DependsOn: IPv6CidrBlock
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 2, !GetAZs '' ]
+      CidrBlock: 10.30.128.0/24
+      AssignIpv6AddressOnCreation: true
+      Ipv6CidrBlock: 
+        Fn::Sub:
+          - "${VpcPart}${SubnetPart}"
+          - SubnetPart: '0A::/64'
+            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
+      Tags:
+        - Key: Name
+          Value: dev-sn-db-C
+Outputs:
+  6snvpc:
+    Description: VPC with 6 subnets and ipv6
+    Value: !Ref VPC
+    Export: 
+      Name: 6snvpc
+  6snvpcsubnetweba:
+    Description: WebA subnet in 6 subnet vpc
+    Value: !Ref SubnetWebA
+    Export: 
+      Name: 6snvpc-subnet-weba
+  6snvpcsubnetwebb:
+    Description: WebB subnet in 6 subnet vpc
+    Value: !Ref SubnetWebB
+    Export: 
+      Name: 6snvpc-subnet-webb
+  6snvpcsubnetwebc:
+    Description: WebC subnet in 6 subnet vpc
+    Value: !Ref SubnetWebC
+    Export: 
+      Name: 6snvpc-subnet-webc
+  6snvpcsubnetappa:
+    Description: AppA subnet in 6 subnet vpc
+    Value: !Ref SubnetAppA
+    Export: 
+      Name: 6snvpc-subnet-appa
+  6snvpcsubnetappb:
+    Description: AppB subnet in 6 subnet vpc
+    Value: !Ref SubnetAppB
+    Export: 
+      Name: 6snvpc-subnet-appb
+  6snvpcsubnetappc:
+    Description: AppC subnet in 6 subnet vpc
+    Value: !Ref SubnetAppC
+    Export: 
+      Name: 6snvpc-subnet-appc
+  6snvpcsubnetdba:
+    Description: DBA subnet in 6 subnet vpc
+    Value: !Ref SubnetDBA
+    Export: 
+      Name: 6snvpc-subnet-dba
+  6snvpcsubnetdbb:
+    Description: DBB subnet in 6 subnet vpc
+    Value: !Ref SubnetDBB
+    Export: 
+      Name: 6snvpc-subnet-dbb
+  6snvpcsubnetdbc:
+    Description: DBC subnet in 6 subnet vpc
+    Value: !Ref SubnetDBC
+    Export: 
+      Name: 6snvpc-subnet-dbc
+
+

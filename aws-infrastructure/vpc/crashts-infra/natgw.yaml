@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: This template deploys a NATGW on top of vpc-6subnets-w-ipv6 template
+
+Resources:
+  EIPA: 
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+  EIPB: 
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+  EIPC: 
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+  NatGatewayA:
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt EIPA.AllocationId
+      SubnetId: !ImportValue 6snvpc-subnet-weba
+  NatGatewayB:
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt EIPA.AllocationId
+      SubnetId: !ImportValue 6snvpc-subnet-webb
+  NatGatewayC:
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt EIPA.AllocationId
+      SubnetId: !ImportValue 6snvpc-subnet-webc
+  routeTablePrivA:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !ImportValue 6snvpc
+      Tags:
+        - Key: name
+          Value: 6snvpc-rt-privateA
+  routeTablePrivB:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !ImportValue 6snvpc
+      Tags:
+        - Key: name
+          Value: 6snvpc-rt-privateB
+  routeTablePrivC:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !ImportValue 6snvpc
+      Tags:
+        - Key: name
+          Value: 6snvpc-rt-privateC
+  RouteNatGWA:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref RouteTablePrivA
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NatGatewayA
+  RouteNatGWB:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref RouteTablePrivA
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NatGatewayB
+  RouteNatGWC:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref RouteTablePrivA
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NatGatewayC
+  
+  
