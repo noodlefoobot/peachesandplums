@@ -68,5 +68,34 @@ Resources:
       RouteTableId: !Ref RouteTablePrivA
       DestinationCidrBlock: '0.0.0.0/0'
       NatGatewayId: !Ref NatGatewayC
-  
+  RouteTableAssociationAppA:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !ImportValue 6snvpc-subnet-weba
+      RouteTableId: !Ref RouteTablePrivateA
+  RouteTableAssociationDBA:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !ImportValue 6snvpc-subnet-dba
+      RouteTableId: !Ref RouteTablePrivateA
+  RouteTableAssociationAppB:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !ImportValue 6snvpc-subnet-webb
+      RouteTableId: !Ref RouteTablePrivateB
+  RouteTableAssociationDBB:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !ImportValue 6snvpc-subnet-dbb
+      RouteTableId: !Ref RouteTablePrivateB
+  RouteTableAssociationAppC:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !ImportValue 6snvpc-subnet-webc
+      RouteTableId: !Ref RouteTablePrivateC
+  RouteTableAssociationDBC:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !ImportValue 6snvpc-subnet-dbc
+      RouteTableId: !Ref RouteTablePrivateC
   
