@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: This template deploys a NATGW on top of vpc-4subnets-w-ipv6 template
+
+Resources:
+  EIPA: 
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+  EIPB: 
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+  EIPC: 
+    Type: 'AWS::EC2::EIP'
+    Properties:
+      Domain: vpc
+  NatGatewayA:
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt EIPA.AllocationId
+      SubnetId: !ImportValue 4snvpc-subnet-puba
+  NatGatewayB:
+    Type: 'AWS::EC2::NatGateway'
+    Properties:
+      AllocationId: !GetAtt EIPA.AllocationId
+      SubnetId: !ImportValue 4snvpc-subnet-pubb
+  RouteTablePrivA:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !ImportValue 4snvpc
+      Tags:
+        - Key: name
+          Value: 4snvpc-rt-privA
+  RouteTablePrivB:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !ImportValue 6snvpc
+      Tags:
+        - Key: name
+          Value: 4snvpc-rt-privB
+  RouteNatGWA:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref RouteTablePrivA
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NatGatewayA
+  RouteNatGWB:
+    Type: 'AWS::EC2::Route'
+    Properties:
+      RouteTableId: !Ref RouteTablePrivA
+      DestinationCidrBlock: '0.0.0.0/0'
+      NatGatewayId: !Ref NatGatewayB
+  RouteTableAssociationPrivA:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !ImportValue 4snvpc-subnet-priva
+      RouteTableId: !Ref RouteTablePrivA
+  RouteTableAssociationPrivB:
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      SubnetId: !ImportValue 4snvpc-subnet-privb
+      RouteTableId: !Ref RouteTablePrivB

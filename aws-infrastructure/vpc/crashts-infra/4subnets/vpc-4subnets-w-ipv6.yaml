@@ -1,0 +1,159 @@
+
+AWSTemplateFormatVersion: 2010-09-09
+Description: This template deploys  VPC with the following resources - 
+  1. One VPC
+  2. Two public subnets in us-east-2a/b
+  3. Two private subnets in us-east-2a/b
+  4. IGW with a default route to public subnets
+  5. Route tables to route traffic on each subnet to route traffic to net
+
+# TO ADD TO ANOTHER TEMPLATE 
+# 6. NAT gateways for private subnets
+# 7. Four SGs to control access for inbound/outbound net traffic to each tier
+# 8. One priv and one pub basic NACL which simply allows all traffic ****** WHAT******
+# 9. Three S3 endpoints to allow private subnet direct access to S3
+# 10. Basion host to allow access in
+
+Resources:
+  VPC: 
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.30.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: crashts-dev
+  IPv6CidrBlock:
+    Type: AWS::EC2::VPCCidrBlock
+    Properties:
+      VpcId: !Ref VPC
+      AmazonProvidedIpv6CidrBlock: true
+  IGWdev:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: keyname
+          Value: value
+  IGWAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref IGWdev
+  RouteTablePublic:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags:
+        - Key: Name
+          Value: crashts-dev-rt-public
+  RouteTablePublicDefaultIPv4:
+    Type: AWS::EC2::Route
+    DependsOn: IGWAttachment
+    Properties:
+      RouteTableId:
+        Ref: RouteTablePublic
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId:
+        Ref: IGWdev
+  RouteTableAssociationWebA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetPublicA
+      RouteTableId: !Ref RouteTablePublic
+  RouteTableAssociationWebB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref SubnetPublicB
+      RouteTableId: !Ref RouteTablePublic
+  SubnetPublicA:
+    Type: AWS::EC2::Subnet
+    DependsOn: IPv6CidrBlock
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: 10.30.0.0/24
+      AssignIpv6AddressOnCreation: true
+      Ipv6CidrBlock: 
+        Fn::Sub:
+          - "${VpcPart}${SubnetPart}"
+          - SubnetPart: '00::/64'
+            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
+      Tags:
+        - Key: Name
+          Value: dev-sn-pub-A
+  SubnetPublicB:
+    Type: AWS::EC2::Subnet
+    DependsOn: IPv6CidrBlock
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: 10.30.48.0/24
+      AssignIpv6AddressOnCreation: true
+      Ipv6CidrBlock: 
+        Fn::Sub:
+          - "${VpcPart}${SubnetPart}"
+          - SubnetPart: '04::/64'
+            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
+      Tags:
+        - Key: Name
+          Value: dev-sn-pub-B
+  SubnetPrivateA:
+    Type: AWS::EC2::Subnet
+    DependsOn: IPv6CidrBlock
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 0, !GetAZs '' ]
+      CidrBlock: 10.30.16.0/24
+      AssignIpv6AddressOnCreation: true
+      Ipv6CidrBlock: 
+        Fn::Sub:
+          - "${VpcPart}${SubnetPart}"
+          - SubnetPart: '01::/64'
+            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
+      Tags:
+        - Key: Name
+          Value: dev-sn-priv-A
+  SubnetPrivateB:
+    Type: AWS::EC2::Subnet
+    DependsOn: IPv6CidrBlock
+    Properties:
+      VpcId: !Ref VPC
+      AvailabilityZone: !Select [ 1, !GetAZs '' ]
+      CidrBlock: 10.30.64.0/24
+      AssignIpv6AddressOnCreation: true
+      Ipv6CidrBlock: 
+        Fn::Sub:
+          - "${VpcPart}${SubnetPart}"
+          - SubnetPart: '05::/64'
+            VpcPart: !Select [ 0, !Split [ '00::/56', !Select [ 0, !GetAtt VPC.Ipv6CidrBlocks ]]]
+      Tags:
+        - Key: Name
+          Value: dev-sn-priv-B
+  
+  Outputs:
+  4snvpc:
+    Description: VPC with 4 subnets and ipv6
+    Value: !Ref VPC
+    Export: 
+      Name: 4snvpc
+  4snvpcsubnetpuba:
+    Description: PubA subnet in 4 subnet vpc
+    Value: !Ref SubnetPublicA
+    Export: 
+      Name: 4snvpc-subnet-puba
+  4snvpcsubnetpubb:
+    Description: PubB subnet in 4 subnet vpc
+    Value: !Ref SubnetPublicB
+    Export: 
+      Name: 4snvpc-subnet-pubb
+  4snvpcsubnetpriva:
+    Description: PrivA subnet in 4 subnet vpc
+    Value: !Ref SubnetPrivA
+    Export: 
+      Name: 4snvpc-subnet-priva
+  4snvpcsubnetprivb:
+    Description: PrivB subnet in 4 subnet vpc
+    Value: !Ref SubnetPrivB
+    Export: 
+      Name: 4snvpc-subnet-privb
