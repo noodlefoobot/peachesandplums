@@ -8,7 +8,7 @@ Description: This template deploys  VPC with the following resources -
   5. Route tables to route traffic on each subnet to route traffic to net
 
 # TO ADD TO ANOTHER TEMPLATE 
-# 6. NAT gateways for private subnets
+# 6. 
 # 7. Four SGs to control access for inbound/outbound net traffic to each tier
 # 8. One priv and one pub basic NACL which simply allows all traffic ****** WHAT******
 # 9. Three S3 endpoints to allow private subnet direct access to S3
