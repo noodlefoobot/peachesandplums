@@ -23,23 +23,23 @@ Resources:
       EnableDnsHostnames: true
       Tags:
         - Key: Name
-          Value: crashts-dev
+          Value: 4snvpc
   IPv6CidrBlock:
     Type: AWS::EC2::VPCCidrBlock
     Properties:
       VpcId: !Ref VPC
       AmazonProvidedIpv6CidrBlock: true
-  IGWdev:
+  IGW:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: keyname
-          Value: value
+          Value: 4snvpc-IGW
   IGWAttachment:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
       VpcId: !Ref VPC
-      InternetGatewayId: !Ref IGWdev
+      InternetGatewayId: !Ref IGW
   RouteTablePublic:
     Type: AWS::EC2::RouteTable
     Properties:
@@ -55,7 +55,7 @@ Resources:
         Ref: RouteTablePublic
       DestinationCidrBlock: '0.0.0.0/0'
       GatewayId:
-        Ref: IGWdev
+        Ref: IGW
   RouteTableAssociationWebA:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -130,8 +130,7 @@ Resources:
       Tags:
         - Key: Name
           Value: dev-sn-priv-B
-  
-  Outputs:
+Outputs:
   4snvpc:
     Description: VPC with 4 subnets and ipv6
     Value: !Ref VPC
@@ -149,11 +148,11 @@ Resources:
       Name: 4snvpc-subnet-pubb
   4snvpcsubnetpriva:
     Description: PrivA subnet in 4 subnet vpc
-    Value: !Ref SubnetPrivA
+    Value: !Ref SubnetPrivateA
     Export: 
       Name: 4snvpc-subnet-priva
   4snvpcsubnetprivb:
     Description: PrivB subnet in 4 subnet vpc
-    Value: !Ref SubnetPrivB
+    Value: !Ref SubnetPrivateB
     Export: 
       Name: 4snvpc-subnet-privb
